@@ -40,11 +40,11 @@ public class GameController {
 
             String columnInput;
 
-            System.out.print("Kérlek, add meg a játékállás fájl nevét");
+            System.out.print("Please enter the name of the game state file: ");
             String filePath = scanner.nextLine();
 
             try {
-                System.out.print("Kérlek, add meg a fájl nevét (és elérési útját), ahová a játék állapotát szeretnéd menteni: ");
+                System.out.print("Please enter the name (and path) of the file where you would like to save the game state: ");
                 String saveFilePath = scanner.nextLine();
             } catch (Exception e) {
                 throw new RuntimeException(e);
