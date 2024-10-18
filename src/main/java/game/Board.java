@@ -21,7 +21,7 @@ public class Board {
             for (int j = 0; j < COLS; j++) {
                 System.out.print("." + board[i][j]);
             }
-            System.out.println(".....");
+            System.out.println(".");
             System.out.println("-----------------");
         }
     }
