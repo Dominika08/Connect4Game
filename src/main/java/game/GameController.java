@@ -31,6 +31,16 @@ public class GameController {
 
         totalGames = getNumberOfGames();
 
+        System.out.print("Please enter the name of the game state file: ");
+        String filePath = scanner.nextLine();
+
+        try {
+            System.out.print("Please enter the name (and path) of the file where you would like to save the game state: ");
+            String saveFilePath = scanner.nextLine();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         for (int i = 0; i < totalGames; i++) {
             System.out.println("\nStarting Game " + (i + 1) + "!");
             board = new Board();
@@ -40,15 +50,6 @@ public class GameController {
 
             String columnInput;
 
-            System.out.print("Please enter the name of the game state file: ");
-            String filePath = scanner.nextLine();
-
-            try {
-                System.out.print("Please enter the name (and path) of the file where you would like to save the game state: ");
-                String saveFilePath = scanner.nextLine();
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
 
             while (true) {
                 board.printBoard();
