@@ -13,6 +13,9 @@ public class Board {
             }
         }
     }
+    public char[][] getBoard() {
+        return board;
+    }
 
     public void printBoard() {
         System.out.print("   A B C D E F G\n");

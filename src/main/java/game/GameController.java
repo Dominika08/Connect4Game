@@ -44,21 +44,16 @@ public class GameController {
         for (int i = 0; i < totalGames; i++) {
             System.out.println("\nStarting Game " + (i + 1) + "!");
             board = new Board();
-            playerYellow = new Player('Y');
-            playerRed = new Player('R');
+            playerYellow = new Player('Y', playerName);
+            playerRed = new Player('R', "Computer");
             currentPlayer = playerYellow;
-
-            String columnInput;
-
 
             while (true) {
                 board.printBoard();
-                if (currentPlayer.getSymbol() == 'Y') {
-                    System.out.print(playerName + " (Yellow), choose a column (A-G): ");
-                    columnInput = scanner.nextLine().toUpperCase();
-                    int column = columnInput.charAt(0) - 'A';
 
-                    if (column < 0 || column >= board.getCols() || !board.dropPiece(column, currentPlayer.getSymbol())) {
+                if (currentPlayer.getSymbol() == 'Y') {
+                    int column = playerYellow.chooseColumn(board);
+                    if (!board.dropPiece(column, currentPlayer.getSymbol())) {
                         System.out.println("Invalid move. Try again.");
                         continue;
                     }
