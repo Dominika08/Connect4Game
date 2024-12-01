@@ -1,5 +1,7 @@
 package game;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -9,11 +11,12 @@ public class GameController {
     private Player playerRed;
     private Player currentPlayer;
     private Scanner scanner;
-    private String playerName;
-    private int totalGames;
+    private String saveFilePath;
+    private DatabaseManager databaseManager;
 
     public GameController() {
         scanner = new Scanner(System.in);
+        databaseManager = new DatabaseManager();
     }
 
     public void startGame() {
@@ -25,99 +28,77 @@ public class GameController {
                 "The first player to achieve this wins the game.\n" +
                 "You will be player Yellow and your opponent (computer) will be RED!\n\n" +
                 "GOOD LUCK!\n\n\n");
+        System.out.print("Enter your name: ");
+        String playerName = scanner.nextLine();
 
-        System.out.print("Enter your username: ");
-        playerName = scanner.nextLine();
+        playerYellow = new Player('Y', playerName);
+        playerRed = new Player('R', "Computer");
+        currentPlayer = playerYellow;
 
-        totalGames = getNumberOfGames();
+        board = new Board();
 
-        System.out.print("Please enter the name of the game state file: ");
-        String filePath = scanner.nextLine();
 
-        try {
-            System.out.print("Please enter the name (and path) of the file where you would like to save the game state: ");
-            String saveFilePath = scanner.nextLine();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        System.out.print("Enter the name of the file to load the game (or press Enter to start a new game): ");
+        String loadFilePath = scanner.nextLine();
+        if (!loadFilePath.isEmpty()) {
+            File file = new File(loadFilePath);
+            if (file.exists()) {
+                try {
+                    board.loadFromFile(loadFilePath);
+                    System.out.println("Game loaded successfully!");
+                } catch (IOException e) {
+                    System.out.println("Failed to load the game. Starting a new one.");
+                }
+            } else {
+                System.out.println("File does not exist. Starting a new game.");
+            }
         }
 
-        for (int i = 0; i < totalGames; i++) {
-            System.out.println("\nStarting Game " + (i + 1) + "!");
-            board = new Board();
-            playerYellow = new Player('Y', playerName);
-            playerRed = new Player('R', "Computer");
-            currentPlayer = playerYellow;
+        System.out.print("Enter the name of the file to save the game: ");
+        saveFilePath = scanner.nextLine();
 
-            while (true) {
-                board.printBoard();
+        while (true) {
+            board.printBoard();
 
-                if (currentPlayer.getSymbol() == 'Y') {
-                    int column = playerYellow.chooseColumn(board);
-                    if (!board.dropPiece(column, currentPlayer.getSymbol())) {
-                        System.out.println("Invalid move. Try again.");
-                        continue;
-                    }
-                } else {
-                    System.out.println("Computer (Red) is making a move...");
-                    computerMove();
-                }
+            int column;
+            if (currentPlayer == playerYellow) {
+                column = playerYellow.chooseColumn(board);
+            } else {
+                column = new Random().nextInt(Board.COLS);
+                System.out.println("Computer chooses column: " + (char) ('A' + column));
+            }
 
+            if (board.dropPiece(column, currentPlayer.getSymbol())) {
                 if (board.checkWin(currentPlayer.getSymbol())) {
                     board.printBoard();
-                    System.out.println("Player " + (currentPlayer.getSymbol() == 'Y' ? playerName : "Computer") + " wins!");
+                    System.out.println(currentPlayer.getName() + " wins!");
+
+                    databaseManager.addWin(currentPlayer.getName());
+
+                    saveGame();
                     break;
                 }
-
-                if (isBoardFull()) {
-                    board.printBoard();
-                    System.out.println("It's a TIE!");
-                    break;
-                }
-
                 switchPlayer();
+                saveGame();
+            } else {
+                System.out.println("Column full! Try again.");
             }
         }
-        scanner.close();
+
+
+        databaseManager.printPlayerStats();
     }
 
-    private int getNumberOfGames() {
-        int games = 0;
-        while (true) {
-            System.out.print("How many games would you like to play (1-5)? ");
-            String input = scanner.nextLine();
-
-            try {
-                games = Integer.parseInt(input);
-                if (games > 0 && games <= 5) {
-                    break;
-                } else {
-                    System.out.println("Please choose a number greater than 0 and less than or equal to 5.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a number between 1 and 5.");
-            }
+    private void saveGame() {
+        try {
+            board.saveToFile(saveFilePath);
+            System.out.println("Game saved successfully!");
+        } catch (IOException e) {
+            System.out.println("Failed to save the game.");
         }
-        return games;
-    }
-
-    private boolean isBoardFull() {
-        for (int col = 0; col < board.getCols(); col++) {
-            if (board.dropPiece(col, ' ')) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private void switchPlayer() {
         currentPlayer = (currentPlayer == playerYellow) ? playerRed : playerYellow;
-    }
-
-    private void computerMove() {
-        Random random = new Random();
-        int col;
-        do {
-            col = random.nextInt(board.getCols());
-        } while (!board.dropPiece(col, playerRed.getSymbol()));
     }
 }

@@ -1,5 +1,6 @@
 package game;
 
+import java.io.*;
 public class Board {
     public static final int ROWS = 6;
     public static final int COLS = 7;
@@ -13,6 +14,7 @@ public class Board {
             }
         }
     }
+
     public char[][] getBoard() {
         return board;
     }
@@ -97,5 +99,27 @@ public class Board {
 
     public int getCols() {
         return COLS;
+    }
+
+    public void saveToFile(String filePath) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            for (int i = 0; i < ROWS; i++) {
+                for (int j = 0; j < COLS; j++) {
+                    writer.write(board[i][j]);
+                }
+                writer.newLine();
+            }
+        }
+    }
+
+    public void loadFromFile(String filePath) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
+            for (int i = 0; i < ROWS; i++) {
+                String line = reader.readLine();
+                for (int j = 0; j < COLS; j++) {
+                    board[i][j] = line.charAt(j);
+                }
+            }
+        }
     }
 }
